@@ -51,7 +51,7 @@ JNI_OnLoad (JavaVM *vm, void *reserved)
 		return 0;
 	}
 
-	klass = (*env)->FindClass (env, "hev/dns/DNSFwdService");
+	klass = (*env)->FindClass (env, "hev/htproxy/DNSFwdService");
 	(*env)->RegisterNatives (env, klass, native_methods, N_ELEMENTS (native_methods));
 	(*env)->DeleteLocalRef (env, klass);
 
