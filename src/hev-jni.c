@@ -30,7 +30,7 @@ static void native_stop_service (JNIEnv *env, jobject thiz);
 
 static JNINativeMethod native_methods[] =
 {
-	{ "NativeStartService", "(Ljava/lang/String;ILjava/lang/String;I)V", (void *) native_start_service },
+	{ "NativeStartService", "(Ljava/lang/String;ILjava/lang/String;)V", (void *) native_start_service },
 	{ "NativeStopService", "()V", (void *) native_stop_service },
 };
 
