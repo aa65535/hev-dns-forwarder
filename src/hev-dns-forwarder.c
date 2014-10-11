@@ -37,6 +37,7 @@ struct _HevDNSForwarder
 static bool listener_source_handler (HevEventSourceFD *fd, void *data);
 static bool timeout_source_handler (void *data);
 static void session_close_handler (HevDNSSession *session, void *data);
+static void remove_all_sessions (HevDNSForwarder *self);
 
 HevDNSForwarder *
 hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, unsigned short port,
@@ -116,6 +117,7 @@ hev_dns_forwarder_unref (HevDNSForwarder *self)
 			hev_event_loop_del_source (self->loop, self->listener_source);
 			hev_event_loop_del_source (self->loop, self->timeout_source);
 			close (self->listen_fd);
+			remove_all_sessions (self);
 			HEV_MEMORY_ALLOCATOR_FREE (self);
 		}
 	}
@@ -177,5 +179,19 @@ session_close_handler (HevDNSSession *session, void *data)
 				hev_dns_session_get_source (session));
 	hev_dns_session_unref (session);
 	self->session_list = hev_slist_remove (self->session_list, session);
+}
+
+static void
+remove_all_sessions (HevDNSForwarder *self)
+{
+	HevSList *list = NULL;
+	for (list=self->session_list; list; list=hev_slist_next (list)) {
+		HevDNSSession *session = hev_slist_data (list);
+		/* printf ("Remove session %p\n", session); */
+		hev_event_loop_del_source (self->loop,
+					hev_dns_session_get_source (session));
+		hev_dns_session_unref (session);
+	}
+	hev_slist_free (self->session_list);
 }
 
