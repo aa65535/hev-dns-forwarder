@@ -9,15 +9,28 @@
 
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "hev-main.h"
 #include "hev-dns-forwarder.h"
 #include "hev-event-source-signal.h"
 
+static const char *default_dns_servers = "8.8.8.8";
+static const char *default_listen_addr = "0.0.0.0";
+static const char *default_listen_port = "5300";
+
 static void
-show_help (const char *app)
+usage (const char *app)
 {
-	fprintf (stderr, "%s ADDR PORT UPSTREAM\n", app);
+	printf ("\
+usage: %s [-h] [-b BIND_ADDR] [-p BIND_PORT] [-s DNS]\n\
+Forwarding DNS queries on TCP transport.\n\
+\n\
+  -b BIND_ADDR          address that listens, default: 0.0.0.0\n\
+  -p BIND_PORT          port that listens, default: 5300\n\
+  -s DNS                DNS servers to use, default: 8.8.8.8\n\
+  -h                    show this help message and exit\n", app);
 }
 
 static bool
@@ -29,15 +42,42 @@ signal_handler (void *data)
 }
 
 int
-main (int argc, char *argv[])
+main (int argc, char **argv)
 {
 	HevEventLoop *loop = NULL;
 	HevEventSource *source = NULL;
 	HevDNSForwarder *forwarder = NULL;
 
-	if (4 != argc) {
-		show_help (argv[0]);
-		exit (1);
+	int ch;
+	char *listen_addr = NULL;
+	char *listen_port = NULL;
+	char *dns_servers = NULL;
+
+	while ((ch = getopt(argc, argv, "hb:p:s:")) != -1) {
+		switch (ch) {
+			case 'h':
+				usage(argv[0]);
+				exit(0);
+			case 'b':
+				listen_addr = strdup(optarg);
+				break;
+			case 'p':
+				listen_port = strdup(optarg);
+				break;
+			case 's':
+				dns_servers = strdup(optarg);
+				break;
+		}
+	}
+
+	if (dns_servers == NULL) {
+		dns_servers = strdup(default_dns_servers);
+	}
+	if (listen_addr == NULL) {
+		listen_addr = strdup(default_listen_addr);
+	}
+	if (listen_port == NULL) {
+		listen_port = strdup(default_listen_port);
 	}
 
 	loop = hev_event_loop_new ();
@@ -50,7 +90,7 @@ main (int argc, char *argv[])
 	hev_event_loop_add_source (loop, source);
 	hev_event_source_unref (source);
 
-	forwarder = hev_dns_forwarder_new (loop, argv[1], atoi (argv[2]), argv[3]);
+	forwarder = hev_dns_forwarder_new (loop, listen_addr, atoi(listen_port), dns_servers);
 	if (forwarder) {
 		hev_event_loop_run (loop);
 		hev_dns_forwarder_unref (forwarder);
