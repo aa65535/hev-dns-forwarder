@@ -10,7 +10,8 @@
 #ifndef __HEV_DNS_FORWARDER_H__
 #define __HEV_DNS_FORWARDER_H__
 
-#include "hev-lib.h"
+#include "hev-dns-session.h"
+#include "hev-event-source-timeout.h"
 
 typedef struct _HevDNSForwarder HevDNSForwarder;
 

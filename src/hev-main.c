@@ -12,6 +12,7 @@
 
 #include "hev-main.h"
 #include "hev-dns-forwarder.h"
+#include "hev-event-source-signal.h"
 
 static void
 show_help (const char *app)

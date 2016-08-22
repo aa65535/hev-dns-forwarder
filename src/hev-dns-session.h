@@ -13,7 +13,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#include "hev-lib.h"
+#include "hev-ring-buffer.h"
+#include "hev-event-source.h"
+#include "hev-event-source-fds.h"
 
 typedef struct _HevDNSSession HevDNSSession;
 typedef void (*HevDNSSessionCloseNotify) (HevDNSSession *self, void *data);
