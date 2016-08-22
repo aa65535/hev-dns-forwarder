@@ -10,9 +10,10 @@
 #ifndef __HEV_DNS_SESSION_H__
 #define __HEV_DNS_SESSION_H__
 
-#include <hev-lib.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "hev-lib.h"
 
 typedef struct _HevDNSSession HevDNSSession;
 typedef void (*HevDNSSessionCloseNotify) (HevDNSSession *self, void *data);

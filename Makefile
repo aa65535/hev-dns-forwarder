@@ -2,12 +2,12 @@
  
 PP=cpp
 CC=cc
-CCFLAGS=-O3 -Werror -Wall -I ../hev-lib/include
-LDFLAGS=-L ../hev-lib/bin -l hev-lib
+CCFLAGS=-O3 -Werror -Wall
+LDFLAGS=
  
 SRCDIR=src
-BINDIR=bin
-BUILDDIR=build
+BINDIR=src
+BUILDDIR=src
  
 TARGET=$(BINDIR)/hev-dns-forwarder
 CCOBJSFILE=$(BUILDDIR)/ccobjs
@@ -20,7 +20,7 @@ all : $(CCOBJSFILE) $(TARGET)
 	@$(RM) $(CCOBJSFILE)
  
 clean : 
-	@echo -n "Clean ... " && $(RM) $(BINDIR)/* $(BUILDDIR)/* && echo "OK"
+	@echo -n "Clean ... " && $(RM) $(TARGET) $(CCOBJSFILE) $(BUILDDIR)/*.dep  $(BUILDDIR)/*.o && echo "OK"
  
 $(CCOBJSFILE) : 
 	@echo CCOBJS=`ls $(SRCDIR)/*.c` > $(CCOBJSFILE)
@@ -35,4 +35,3 @@ $(BUILDDIR)/%.o : $(SRCDIR)/%.c
 	@echo -n "Building $< ... " && $(CC) $(CCFLAGS) -c -o $@ $< && echo "OK"
  
 -include $(DEPEND)
-

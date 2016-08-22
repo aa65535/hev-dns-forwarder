@@ -10,7 +10,7 @@
 #ifndef __HEV_DNS_FORWARDER_H__
 #define __HEV_DNS_FORWARDER_H__
 
-#include <hev-lib.h>
+#include "hev-lib.h"
 
 typedef struct _HevDNSForwarder HevDNSForwarder;
 
