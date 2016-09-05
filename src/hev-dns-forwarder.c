@@ -64,6 +64,7 @@ hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, unsigned short port
 						(socklen_t) sizeof (iaddr))) {
 			close (self->listen_fd);
 			HEV_MEMORY_ALLOCATOR_FREE (self);
+			fprintf (stderr, "Can't bind address %s:%d\n", addr, port);
 			return NULL;
 		}
 
