@@ -51,7 +51,7 @@ struct _HevDNSSession
 	struct sockaddr_in client_addr;
 };
 
-static void dns_read_request (HevDNSSession *self);
+static int dns_read_request (HevDNSSession *self);
 static void dns_do_connect (HevDNSSession *self);
 static void dns_close_session (HevDNSSession *self);
 static bool session_source_forward_handler (HevEventSourceFD *fd, void *data);
@@ -127,8 +127,8 @@ void
 hev_dns_session_start (HevDNSSession *self)
 {
 	if (self) {
-		dns_do_connect (self);
-		dns_read_request (self);
+		if (0 <= dns_read_request (self))
+		  dns_do_connect (self);
 	}
 }
 
@@ -250,7 +250,7 @@ remote_write (HevDNSSession *self)
 	return true;
 }
 
-static void
+static int
 dns_read_request (HevDNSSession *self)
 {
 	ssize_t size;
@@ -262,11 +262,13 @@ dns_read_request (HevDNSSession *self)
 	size = read_data (self->cfd, self->forward_buffer, &self->client_addr);
 	if (0 > size) {
 		dns_close_session (self);
-		return;
+		return -1;
 	}
 
 	plen = iovec[0].iov_base;
 	*plen = htons (size);
+
+	return 0;
 }
 
 static void
