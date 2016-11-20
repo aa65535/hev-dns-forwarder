@@ -26,6 +26,7 @@ run :
 	@$(TARGET)
  
 $(CCOBJSFILE) : 
+	@mkdir -p $(BINDIR) $(BUILDDIR)
 	@echo CCOBJS=`ls $(SRCDIR)/*.c` > $(CCOBJSFILE)
  
 $(TARGET) : $(LDOBJS)
