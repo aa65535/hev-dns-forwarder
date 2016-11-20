@@ -17,6 +17,7 @@
 #include "hev-event-source-signal.h"
 
 static const char *default_dns_servers = "8.8.8.8#53";
+static const char *default_dns_port = "53";
 static const char *default_listen_addr = "0.0.0.0";
 static const char *default_listen_port = "5300";
 
@@ -74,6 +75,12 @@ main (int argc, char **argv)
 	if (dns_servers == NULL) {
 		dns_servers = strdup(default_dns_servers);
 	}
+	dns_port = strpbrk(dns_servers, ":#");
+	if(dns_port == NULL){
+		dns_port = strdup(default_dns_port);
+	}else{
+		*dns_port++ = '\0';
+	}
 	if (listen_addr == NULL) {
 		listen_addr = strdup(default_listen_addr);
 	}
@@ -90,10 +97,6 @@ main (int argc, char **argv)
 	hev_event_source_set_callback (source, signal_handler, loop, NULL);
 	hev_event_loop_add_source (loop, source);
 	hev_event_source_unref (source);
-
-	// depart server address and server port
-	dns_port = strpbrk(dns_servers, ":#");
-	*dns_port++ = '\0';
 
 	forwarder = hev_dns_forwarder_new (loop, listen_addr, atoi(listen_port), dns_servers, atoi(dns_port));
 	if (forwarder) {
