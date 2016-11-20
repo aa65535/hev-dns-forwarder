@@ -6,8 +6,8 @@ CCFLAGS=-O3 -Werror -Wall
 LDFLAGS=
  
 SRCDIR=src
-BINDIR=src
-BUILDDIR=src
+BINDIR=bin
+BUILDDIR=build
  
 TARGET=$(BINDIR)/hev-dns-forwarder
 CCOBJSFILE=$(BUILDDIR)/ccobjs
@@ -21,6 +21,9 @@ all : $(CCOBJSFILE) $(TARGET)
  
 clean : 
 	@echo -n "Clean ... " && $(RM) $(TARGET) $(CCOBJSFILE) $(BUILDDIR)/*.dep  $(BUILDDIR)/*.o && echo "OK"
+
+run :
+	@$(TARGET)
  
 $(CCOBJSFILE) : 
 	@echo CCOBJS=`ls $(SRCDIR)/*.c` > $(CCOBJSFILE)

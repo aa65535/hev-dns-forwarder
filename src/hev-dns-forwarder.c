@@ -41,7 +41,7 @@ static void remove_all_sessions (HevDNSForwarder *self);
 
 HevDNSForwarder *
 hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, unsigned short port,
-			const char *upstream)
+			const char *upstream, unsigned short upstream_port)
 {
 	HevDNSForwarder *self = HEV_MEMORY_ALLOCATOR_ALLOC (sizeof (HevDNSForwarder));
 	if (self) {
@@ -92,7 +92,7 @@ hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, unsigned short port
 		memset (&self->upstream, 0, sizeof (self->upstream));
 		self->upstream.sin_family = AF_INET;
 		self->upstream.sin_addr.s_addr = inet_addr (upstream);
-		self->upstream.sin_port = htons (53);
+		self->upstream.sin_port = htons (upstream_port);
 	}
 
 	return self;
