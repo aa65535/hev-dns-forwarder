@@ -17,7 +17,7 @@ typedef struct _HevDNSForwarder HevDNSForwarder;
 
 HevDNSForwarder * hev_dns_forwarder_new (HevEventLoop *loop,
 			const char *addr, unsigned short port,
-			const char *upstream);
+			const char *upstream, unsigned short upstream_port);
 
 HevDNSForwarder * hev_dns_forwarder_ref (HevDNSForwarder *self);
 void hev_dns_forwarder_unref (HevDNSForwarder *self);
