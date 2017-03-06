@@ -16,7 +16,7 @@
 #include "hev-dns-forwarder.h"
 #include "hev-event-source-signal.h"
 
-static const char *default_dns_servers = "8.8.8.8#53";
+static const char *default_dns_servers = "8.8.8.8:53";
 static const char *default_dns_port = "53";
 static const char *default_listen_addr = "0.0.0.0";
 static const char *default_listen_port = "5300";
