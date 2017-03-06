@@ -21,8 +21,12 @@ all : $(CCOBJSFILE) $(TARGET)
  
 clean : 
 	@echo -n "Clean ... " && $(RM) $(TARGET) $(CCOBJSFILE) $(BUILDDIR)/*.dep  $(BUILDDIR)/*.o && echo "OK"
+
+run :
+	@$(TARGET)
  
 $(CCOBJSFILE) : 
+	@mkdir -p $(BINDIR) $(BUILDDIR)
 	@echo CCOBJS=`ls $(SRCDIR)/*.c` > $(CCOBJSFILE)
  
 $(TARGET) : $(LDOBJS)

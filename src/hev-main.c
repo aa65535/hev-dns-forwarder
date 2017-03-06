@@ -16,7 +16,8 @@
 #include "hev-dns-forwarder.h"
 #include "hev-event-source-signal.h"
 
-static const char *default_dns_servers = "8.8.8.8";
+static const char *default_dns_servers = "8.8.8.8#53";
+static const char *default_dns_port = "53";
 static const char *default_listen_addr = "0.0.0.0";
 static const char *default_listen_port = "5300";
 
@@ -29,7 +30,7 @@ Forwarding DNS queries on TCP transport.\n\
 \n\
   -b BIND_ADDR          address that listens, default: 0.0.0.0\n\
   -p BIND_PORT          port that listens, default: 5300\n\
-  -s DNS                DNS servers to use, default: 8.8.8.8\n\
+  -s DNS:[PORT]         DNS servers to use, default: 8.8.8.8:53\n\
   -h                    show this help message and exit\n", app);
 }
 
@@ -52,6 +53,7 @@ main (int argc, char **argv)
 	char *listen_addr = NULL;
 	char *listen_port = NULL;
 	char *dns_servers = NULL;
+	char *dns_port = NULL;
 
 	while ((ch = getopt(argc, argv, "hb:p:s:")) != -1) {
 		switch (ch) {
@@ -73,6 +75,12 @@ main (int argc, char **argv)
 	if (dns_servers == NULL) {
 		dns_servers = strdup(default_dns_servers);
 	}
+	dns_port = strpbrk(dns_servers, ":#");
+	if (dns_port == NULL) {
+		dns_port = strdup(default_dns_port);
+	} else {
+		*dns_port++ = '\0';
+	}
 	if (listen_addr == NULL) {
 		listen_addr = strdup(default_listen_addr);
 	}
@@ -90,7 +98,7 @@ main (int argc, char **argv)
 	hev_event_loop_add_source (loop, source);
 	hev_event_source_unref (source);
 
-	forwarder = hev_dns_forwarder_new (loop, listen_addr, atoi(listen_port), dns_servers);
+	forwarder = hev_dns_forwarder_new (loop, listen_addr, atoi(listen_port), dns_servers, atoi(dns_port));
 	if (forwarder) {
 		hev_event_loop_run (loop);
 		hev_dns_forwarder_unref (forwarder);
