@@ -98,7 +98,7 @@ main (int argc, char **argv)
 	hev_event_loop_add_source (loop, source);
 	hev_event_source_unref (source);
 
-	forwarder = hev_dns_forwarder_new (loop, listen_addr, atoi(listen_port), dns_servers, atoi(dns_port));
+	forwarder = hev_dns_forwarder_new (loop, listen_addr, listen_port, dns_servers, dns_port);
 	if (forwarder) {
 		hev_event_loop_run (loop);
 		hev_dns_forwarder_unref (forwarder);

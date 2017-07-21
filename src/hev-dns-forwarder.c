@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <sys/ioctl.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -40,33 +41,38 @@ static void session_close_handler (HevDNSSession *session, void *data);
 static void remove_all_sessions (HevDNSForwarder *self);
 
 HevDNSForwarder *
-hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, unsigned short port,
-			const char *upstream, unsigned short upstream_port)
+hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, const char *port,
+			const char *upstream, const char *upstream_port)
 {
 	HevDNSForwarder *self = HEV_MEMORY_ALLOCATOR_ALLOC (sizeof (HevDNSForwarder));
 	if (self) {
-		int nonblock = 1, reuseaddr = 1;
-		struct sockaddr_in iaddr;
+		int r, nonblock = 1, reuseaddr = 1;
+		struct addrinfo hints;
+		struct addrinfo *addr_ip;
 
 		/* listen socket */
 		self->listen_fd = socket (AF_INET, SOCK_DGRAM, 0);
 		if (0 > self->listen_fd) {
 			HEV_MEMORY_ALLOCATOR_FREE (self);
+			fprintf (stderr, "socket error\n");
 			return NULL;
 		}
 		ioctl (self->listen_fd, FIONBIO, (char *) &nonblock);
 		setsockopt (self->listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof (reuseaddr));
-		memset (&iaddr, 0, sizeof (iaddr));
-		iaddr.sin_family = AF_INET;
-		iaddr.sin_addr.s_addr = inet_addr (addr);
-		iaddr.sin_port = htons (port);
-		if (0 > bind (self->listen_fd, (struct sockaddr *) &iaddr,
-						(socklen_t) sizeof (iaddr))) {
-			close (self->listen_fd);
-			HEV_MEMORY_ALLOCATOR_FREE (self);
-			fprintf (stderr, "Can't bind address %s:%d\n", addr, port);
+		memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_DGRAM;
+		if (0 != (r = getaddrinfo(addr, port, &hints, &addr_ip))) {
+			fprintf(stderr, "%s:%s:%s\n", gai_strerror(r), addr, port);
 			return NULL;
 		}
+		if (0 != bind(self->listen_fd, addr_ip->ai_addr, addr_ip->ai_addrlen)) {
+			close (self->listen_fd);
+			HEV_MEMORY_ALLOCATOR_FREE (self);
+			fprintf (stderr, "Can't bind address %s:%s\n", addr, port);
+			return NULL;
+		}
+		freeaddrinfo(addr_ip);
 
 		/* event source fds for listener */
 		self->listener_source = hev_event_source_fds_new ();
@@ -91,8 +97,11 @@ hev_dns_forwarder_new (HevEventLoop *loop, const char *addr, unsigned short port
 		/* upstream address */
 		memset (&self->upstream, 0, sizeof (self->upstream));
 		self->upstream.sin_family = AF_INET;
-		self->upstream.sin_addr.s_addr = inet_addr (upstream);
-		self->upstream.sin_port = htons (upstream_port);
+		if (0 == inet_aton (upstream, &self->upstream.sin_addr)) {
+			fprintf (stderr, "invalid upstream %s\n", upstream);
+			return NULL;
+		}
+		self->upstream.sin_port = htons (atoi (upstream_port));
 	}
 
 	return self;
